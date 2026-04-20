@@ -1,0 +1,249 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+////////////////////////////////////////////////////
+// USERS
+////////////////////////////////////////////////////
+
+model User {
+  id                 String   @id @default(cuid())
+  supabaseId         String   @unique
+  email              String   @unique
+  role               UserRole @default(FOUNDER)
+  verified           Boolean  @default(false)
+  subscriptionTier   SubscriptionTier @default(FREE)
+  stripeCustomerId   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  founderProfile  FounderProfile?
+  investorProfile InvestorProfile?
+
+  listings        Listing[]
+  offersReceived  Offer[] @relation("ReceivedOffers")
+  offersSent      Offer[] @relation("SentOffers")
+  waitlistEntry   Waitlist?
+}
+
+////////////////////////////////////////////////////
+// PROFILES
+////////////////////////////////////////////////////
+
+model FounderProfile {
+  id          String @id @default(cuid())
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id])
+
+  companyName String?
+  stage       StartupStage @default(IDEA)
+  bio         String?
+  linkedinUrl String?
+  avatarUrl   String?
+  location    String?
+  website     String?
+
+  updatedAt DateTime @updatedAt
+}
+
+model InvestorProfile {
+  id            String @id @default(cuid())
+  userId        String @unique
+  user          User   @relation(fields: [userId], references: [id])
+
+  investorType  InvestorType @default(ANGEL)
+  checkSizeMin  Int?
+  checkSizeMax  Int?
+  thesis        String?
+  sectors       String[]
+  accredited    Boolean @default(false)
+  verifiedAt    DateTime?
+  linkedinUrl   String?
+  avatarUrl     String?
+
+  updatedAt DateTime @updatedAt
+}
+
+////////////////////////////////////////////////////
+// LISTINGS
+////////////////////////////////////////////////////
+
+model Listing {
+  id         String @id @default(cuid())
+
+  founderId  String
+  founder    User   @relation(fields: [founderId], references: [id])
+
+  title      String
+  tagline    String
+  stage      StartupStage
+  category   ListingCategory
+
+  askAmount  Int
+  equityPct  Float
+  valuation  Int?
+
+  pitchFull  String
+  status     ListingStatus @default(DRAFT)
+  featured   Boolean @default(false)
+
+  offerTypes OfferType[]
+  interestCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reviewedAt DateTime?
+  closedAt   DateTime?
+
+  media      ListingMedia[]
+  highlights ListingHighlight[]
+  offers     Offer[]
+}
+
+model ListingMedia {
+  id        String @id @default(cuid())
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id])
+
+  type      MediaType
+  url       String
+  order     Int @default(0)
+}
+
+model ListingHighlight {
+  id        String @id @default(cuid())
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id])
+
+  metricName  String
+  metricValue String
+}
+
+////////////////////////////////////////////////////
+// OFFERS
+////////////////////////////////////////////////////
+
+model Offer {
+  id        String @id @default(cuid())
+
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id])
+
+  investorId String
+  investor   User @relation("SentOffers", fields: [investorId], references: [id])
+
+  founderId  String
+  founder    User @relation("ReceivedOffers", fields: [founderId], references: [id])
+
+  type   OfferType
+
+  amount           Int?
+  equityRequested  Float?
+  message          String?
+  status           OfferStatus @default(PENDING)
+
+  identitiesRevealed Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+////////////////////////////////////////////////////
+// WAITLIST
+////////////////////////////////////////////////////
+
+model Waitlist {
+  id    String @id @default(cuid())
+
+  email String @unique
+  role  UserRole
+
+  userId String? @unique
+  user   User? @relation(fields: [userId], references: [id])
+
+  source String?
+  notes  String?
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////////////////////////////////////
+// ENUMS
+////////////////////////////////////////////////////
+
+enum UserRole {
+  FOUNDER
+  INVESTOR
+  ADMIN
+}
+
+enum SubscriptionTier {
+  FREE
+  PRO
+  LAUNCH
+}
+
+enum StartupStage {
+  IDEA
+  DESIGN
+  PROTOTYPE
+  PRE_MARKET
+  MARKET
+}
+
+enum ListingStatus {
+  DRAFT
+  REVIEW
+  LIVE
+  CLOSED
+  REJECTED
+}
+
+enum ListingCategory {
+  SOFTWARE
+  HARDWARE
+  BIOTECH
+  AGTECH
+  CLEANTECH
+  FINTECH
+  HEALTHTECH
+  CONSUMER
+  OTHER
+}
+
+enum OfferType {
+  INVESTMENT
+  IP_BUYOUT
+  PARTNER
+  INTEREST
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COUNTERED
+  WITHDRAWN
+}
+
+enum InvestorType {
+  ANGEL
+  FAMILY_OFFICE
+  SEED_FUND
+  STRATEGIC
+}
+
+enum MediaType {
+  IMAGE
+  PDF
+  VIDEO
+}
