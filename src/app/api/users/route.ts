@@ -11,6 +11,13 @@ const createUserSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    if (!process.env.DATABASE_URL) {
+      return NextResponse.json(
+        { error: "Missing DATABASE_URL environment variable" },
+        { status: 500 }
+      )
+    }
+
     const body = await request.json()
     const data = createUserSchema.parse(body)
 
@@ -37,6 +44,8 @@ export async function POST(request: Request) {
         { status: 400 }
       )
     }
+
+    console.error("Failed to create user record", error)
 
     return NextResponse.json(
       { error: "Failed to create user record" },
