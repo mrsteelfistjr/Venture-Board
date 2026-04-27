@@ -13,12 +13,13 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null)
 
   const router = useRouter()
-  const supabase = createClient()
 
   async function handleSignup(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setLoading(true)
     setError(null)
+
+    const supabase = createClient()
 
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
