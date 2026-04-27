@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function proxy(request: NextRequest) {
-  const response = NextResponse.next({
+  let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
@@ -30,16 +30,13 @@ export async function proxy(request: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
+  // Redirect unauthenticated users away from dashboard
   if (!session && request.nextUrl.pathname.startsWith("/dashboard")) {
-    return NextResponse.redirect(new URL("/auth", request.url))
+    return NextResponse.redirect(new URL("/login", request.url))
   }
 
-  if (
-    session &&
-    (request.nextUrl.pathname === "/login" ||
-      request.nextUrl.pathname === "/signup" ||
-      request.nextUrl.pathname === "/auth")
-  ) {
+  // Redirect authenticated users away from auth pages
+  if (session && ["/login", "/signup"].includes(request.nextUrl.pathname)) {
     return NextResponse.redirect(new URL("/dashboard", request.url))
   }
 
