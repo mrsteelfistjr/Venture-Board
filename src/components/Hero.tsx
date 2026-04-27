@@ -16,7 +16,7 @@ export default function Hero() {
       </p>
 
       <button
-        onClick={() => router.push("/auth")}
+        onClick={() => router.push("/signup")}
         className="bg-accent px-6 py-3 rounded-xl text-lg font-semibold hover:scale-105 transition"
       >
         Join Now
