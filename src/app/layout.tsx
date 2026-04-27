@@ -15,14 +15,15 @@ const dmSans = DM_Sans({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://ventureboard.io"),
   title: {
-    default: "VentureBoard — Connective Equity",
+    default: "VentureBoard - Connective Equity",
     template: "%s | VentureBoard",
   },
   description:
     "The curated equity marketplace connecting serious founders with verified investors.",
   openGraph: {
-    title: "VentureBoard — Connective Equity",
+    title: "VentureBoard - Connective Equity",
     description: "Curated. Anonymous. Complete.",
     images: ["/og-image.png"],
     url: "https://ventureboard.io",
