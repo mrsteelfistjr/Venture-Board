@@ -27,6 +27,7 @@ export default async function DashboardLayout({
     select: {
       role: true,
       email: true,
+      subscriptionTier: true,
     },
   })
 
@@ -37,13 +38,18 @@ export default async function DashboardLayout({
       : prismaUser?.role === "FOUNDER" || prismaUser?.role === "INVESTOR"
         ? prismaUser.role
         : "FOUNDER"
+  const tier = prismaUser?.subscriptionTier ?? "FREE"
+  const layoutTone =
+    tier === "LAUNCH"
+      ? "bg-[radial-gradient(circle_at_top,_rgba(45,212,191,0.18),_transparent_32%),linear-gradient(180deg,_#04141a,_#031018_72%)]"
+      : "bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.14),_transparent_30%),linear-gradient(180deg,_#07101d,_#02060d_70%)]"
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.14),_transparent_30%),linear-gradient(180deg,_#07101d,_#02060d_70%)] text-white">
-      <Sidebar role={role} />
+    <div className={`min-h-screen text-white ${layoutTone}`}>
+      <Sidebar role={role} tier={tier} />
 
       <main className="min-h-screen pb-24 lg:ml-60 lg:pb-10">
-        <div className="border-b border-white/8 px-6 py-5 lg:px-10">
+        <div className={`border-b px-6 py-5 lg:px-10 ${tier === "LAUNCH" ? "border-cyan-300/14 bg-linear-to-r from-cyan-300/14 via-transparent to-transparent" : "border-white/8"}`}>
           <p className="text-xs uppercase tracking-[0.32em] text-white/40">
             VentureBoard Control Room
           </p>
@@ -57,9 +63,11 @@ export default async function DashboardLayout({
               </p>
             </div>
             <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70">
-              {role === "FOUNDER"
-                ? "Listings, interest, and investor outreach in one place."
-                : "Track deal flow, founders, and active offer conversations."}
+              {tier === "LAUNCH"
+                ? "Launch tier active: unlimited listings, AI feedback, and concierge support."
+                : role === "FOUNDER"
+                  ? "Listings, interest, and investor outreach in one place."
+                  : "Track deal flow, founders, and active offer conversations."}
             </div>
           </div>
         </div>

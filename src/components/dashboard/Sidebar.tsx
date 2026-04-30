@@ -16,9 +16,11 @@ import {
 import { cn } from "@/lib/utils"
 
 type UserRole = "FOUNDER" | "INVESTOR"
+type SubscriptionTier = "FREE" | "PRO" | "LAUNCH"
 
 type SidebarProps = {
   role: UserRole
+  tier: SubscriptionTier
 }
 
 const sharedNavItems = [
@@ -44,11 +46,13 @@ function isCurrentPath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
-export default function Sidebar({ role }: SidebarProps) {
+export default function Sidebar({ role, tier }: SidebarProps) {
   const pathname = usePathname()
   const roleLabel = role === "FOUNDER" ? "Founder" : "Investor"
   const roleTone =
-    role === "FOUNDER"
+    tier === "LAUNCH"
+      ? "from-teal-300/25 via-cyan-300/10 to-transparent text-cyan-50"
+      : role === "FOUNDER"
       ? "from-cyan-400/20 via-cyan-300/6 to-transparent text-cyan-100"
       : "from-blue-500/20 via-blue-300/6 to-transparent text-blue-100"
 
@@ -80,6 +84,10 @@ export default function Sidebar({ role }: SidebarProps) {
                 ? "Manage listings, watch investor activity, and track incoming offers."
                 : "Browse vetted companies, organize interest, and manage your pipeline."}
             </p>
+            <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/8 bg-white/6 px-3 py-2 text-xs text-white/60">
+              <span>Plan</span>
+              <span className="font-medium text-white">{tier}</span>
+            </div>
           </div>
         </div>
 
@@ -108,6 +116,31 @@ export default function Sidebar({ role }: SidebarProps) {
             })}
           </ul>
         </nav>
+
+        {tier === "LAUNCH" ? (
+          <div className="mx-4 mb-5 rounded-3xl border border-cyan-300/16 bg-linear-to-br from-cyan-300/14 via-white/4 to-transparent p-4">
+            <p className="text-xs uppercase tracking-[0.28em] text-cyan-50/65">
+              Account Manager
+            </p>
+            <div className="mt-3 flex items-center gap-3">
+              <div className="flex size-11 items-center justify-center rounded-2xl bg-white/10 text-sm font-semibold text-white">
+                AN
+              </div>
+              <div>
+                <p className="font-medium text-white">Avery North</p>
+                <p className="text-sm text-white/45">Launch concierge</p>
+              </div>
+            </div>
+            <a
+              href="https://cal.com"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-4 inline-flex rounded-full bg-cyan-300 px-4 py-2 text-sm font-medium text-[#08111f]"
+            >
+              Book a strategy call
+            </a>
+          </div>
+        ) : null}
       </aside>
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#08111f]/96 px-2 py-2 backdrop-blur lg:hidden">
